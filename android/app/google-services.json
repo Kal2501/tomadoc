@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "973675940884",
+    "project_id": "tomadoc-7bfc8",
+    "storage_bucket": "tomadoc-7bfc8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:973675940884:android:046e5327b448de48e2eb01",
+        "android_client_info": {
+          "package_name": "com.example.tomadoc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8m8rhN_08KsW_a58s-_h0hvEVbZIrTnI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
