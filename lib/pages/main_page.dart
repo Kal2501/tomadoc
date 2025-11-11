@@ -27,7 +27,7 @@ class _MainPageState extends State<MainPage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         selectedItemColor: Colors.redAccent,
-        unselectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey[700],
         selectedLabelStyle: GoogleFonts.quicksand(
           fontSize: 12,
           fontWeight: FontWeight.w600,
