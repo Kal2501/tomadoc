@@ -75,9 +75,11 @@ class _CameraPageState extends State<CameraPage> {
 
       await _predictImage();
 
-      // Nonaktifkan kamera
-      await _controller?.dispose();
-      _controller = null;
+      if (_controller != null) {
+        await _controller!.dispose();
+        _controller = null;
+        if (mounted) setState(() {});
+      }
     } catch (e) {
       debugPrint("Error mengambil foto: $e");
     }
@@ -95,8 +97,11 @@ class _CameraPageState extends State<CameraPage> {
 
         await _predictImage();
 
-        await _controller?.dispose();
-        _controller = null;
+        if (_controller != null) {
+          await _controller!.dispose();
+          _controller = null;
+          if (mounted) setState(() {});
+        }
       }
     } catch (e) {
       debugPrint("Error memilih gambar: $e");
@@ -146,11 +151,11 @@ class _CameraPageState extends State<CameraPage> {
   // Upload dan prediksi image API
   Future<void> _predictImage() async{
     if (_capturedImage == null) return;
-
+// 'https://pakbmobile.loca.lt/api/predict'
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://192.168.1.7:8000/api/predict')
+        Uri.parse('https://shaina-untemperate-gary.ngrok-free.dev/api/predict')
       );
 
       request.files.add(await http.MultipartFile.fromPath('image', _capturedImage!.path));
@@ -165,9 +170,10 @@ class _CameraPageState extends State<CameraPage> {
 
         String confidence = data['confidence'] ?? '0%';
 
+        if (!mounted) return;
         setState(() {
           diagnosis = label;
-          accuracy = double.tryParse(confidence.replaceAll('%', '')) ?? 0.0;;
+          accuracy = double.tryParse(confidence.replaceAll('%', '')) ?? 0.0;
         });
       }else{
 
@@ -177,6 +183,7 @@ class _CameraPageState extends State<CameraPage> {
     }
     catch (e){
       debugPrint("Error: ${e.toString()}", wrapWidth: 1024);
+      if (!mounted) return;
       setState(() {
         diagnosis = e.toString();
       });
