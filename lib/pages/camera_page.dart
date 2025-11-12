@@ -177,6 +177,9 @@ class _CameraPageState extends State<CameraPage> {
     }
     catch (e){
       debugPrint("Error: ${e.toString()}", wrapWidth: 1024);
+      setState(() {
+        diagnosis = e.toString();
+      });
     }
 
   }
