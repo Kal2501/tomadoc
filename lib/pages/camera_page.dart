@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -71,6 +73,8 @@ class _CameraPageState extends State<CameraPage> {
         _capturedImage = cropped;
       });
 
+      await _predictImage();
+
       // Nonaktifkan kamera
       await _controller?.dispose();
       _controller = null;
@@ -88,6 +92,9 @@ class _CameraPageState extends State<CameraPage> {
         setState(() {
           _capturedImage = cropped;
         });
+
+        await _predictImage();
+
         await _controller?.dispose();
         _controller = null;
       }
@@ -133,6 +140,45 @@ class _CameraPageState extends State<CameraPage> {
       _capturedImage = null;
     });
     await _initCamera();
+  }
+
+
+  // Upload dan prediksi image API
+  Future<void> _predictImage() async{
+    if (_capturedImage == null) return;
+
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://192.168.1.7:8000/api/predict')
+      );
+
+      request.files.add(await http.MultipartFile.fromPath('image', _capturedImage!.path));
+
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200){
+        var data = jsonDecode(responseBody);
+
+        String label = data['predicted_label'] ?? 'Tidak diketahui';
+
+        String confidence = data['confidence'] ?? '0%';
+
+        setState(() {
+          diagnosis = label;
+          accuracy = double.tryParse(confidence.replaceAll('%', '')) ?? 0.0;;
+        });
+      }else{
+
+        debugPrint("Error,  Status: ${response.statusCode}");
+      }
+
+    }
+    catch (e){
+      debugPrint("Error: ${e.toString()}", wrapWidth: 1024);
+    }
+
   }
 
   Widget _buildResultCard(
@@ -298,7 +344,7 @@ class _CameraPageState extends State<CameraPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      _buildResultCard("Daun Tomat kamu...", diagnosis),
+                      _buildResultCard("Daun Tomat kamu terkena ", diagnosis),
                       _buildResultCard(
                         "Tingkat Akurasi",
                         accuracy.toString(),
