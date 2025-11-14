@@ -21,13 +21,12 @@ class _CameraPageState extends State<CameraPage> {
   Future<void>? _initializeControllerFuture;
   File? _capturedImage;
   final ImagePicker _picker = ImagePicker();
+  bool isPredicting = false;
 
   // Dummy hasil analisis
   String diagnosis =
       "Mengandung penyakit lorem ipsum dolor sit amet, consectetur adipiscing elit.";
   double accuracy = 75.0;
-  String recommendation =
-      "Lakukan penyiraman teratur dan hindari paparan air berlebih.";
 
   @override
   void initState() {
@@ -147,27 +146,31 @@ class _CameraPageState extends State<CameraPage> {
     await _initCamera();
   }
 
-
   // Upload dan prediksi image API
-  Future<void> _predictImage() async{
+  Future<void> _predictImage() async {
     if (_capturedImage == null) return;
-// 'https://pakbmobile.loca.lt/api/predict'
+
+    setState(() {
+      isPredicting = true; // ⬅ mulai loading
+    });
+
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('https://shaina-untemperate-gary.ngrok-free.dev/api/predict')
+        Uri.parse('https://shaina-untemperate-gary.ngrok-free.dev/api/predict'),
       );
 
-      request.files.add(await http.MultipartFile.fromPath('image', _capturedImage!.path));
+      request.files.add(
+        await http.MultipartFile.fromPath('image', _capturedImage!.path),
+      );
 
       var response = await request.send();
       var responseBody = await response.stream.bytesToString();
 
-      if (response.statusCode == 200){
+      if (response.statusCode == 200) {
         var data = jsonDecode(responseBody);
 
         String label = data['predicted_label'] ?? 'Tidak diketahui';
-
         String confidence = data['confidence'] ?? '0%';
 
         if (!mounted) return;
@@ -175,13 +178,10 @@ class _CameraPageState extends State<CameraPage> {
           diagnosis = label;
           accuracy = double.tryParse(confidence.replaceAll('%', '')) ?? 0.0;
         });
-      }else{
-
-        debugPrint("Error,  Status: ${response.statusCode}");
+      } else {
+        debugPrint("Error, Status: ${response.statusCode}");
       }
-
-    }
-    catch (e){
+    } catch (e) {
       debugPrint("Error: ${e.toString()}", wrapWidth: 1024);
       if (!mounted) return;
       setState(() {
@@ -189,6 +189,10 @@ class _CameraPageState extends State<CameraPage> {
       });
     }
 
+    if (!mounted) return;
+    setState(() {
+      isPredicting = false; // ⬅ selesai loading
+    });
   }
 
   Widget _buildResultCard(
@@ -336,31 +340,46 @@ class _CameraPageState extends State<CameraPage> {
                       SizedBox(
                         width: double.infinity,
                         child: TextButton(
-                          onPressed: _retake,
+                          onPressed: isPredicting
+                              ? null
+                              : _retake, // ⬅ disable saat loading
                           style: TextButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
+                            backgroundColor: isPredicting
+                                ? Colors.redAccent.withOpacity(0.5)
+                                : Colors.redAccent,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: Text(
-                            "Ambil Ulang",
-                            style: GoogleFonts.quicksand(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
+                          child: isPredicting
+                              ? SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  "Ambil Ulang",
+                                  style: GoogleFonts.quicksand(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      _buildResultCard("Daun Tomat kamu terkena ", diagnosis),
+                      _buildResultCard(
+                        "Daun Tomat kamu terindikasi terkena",
+                        isPredicting ? "Sedang memproses..." : diagnosis,
+                      ),
                       _buildResultCard(
                         "Tingkat Akurasi",
-                        accuracy.toString(),
-                        isAccuracy: true,
+                        isPredicting ? "..." : accuracy.toString(),
+                        isAccuracy: !isPredicting,
                       ),
-                      _buildResultCard("Saran dari kami", recommendation),
                     ],
                   ),
                 ),
