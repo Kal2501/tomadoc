@@ -57,7 +57,6 @@ Aplikasi ini akan menganalisis gambar daun menggunakan model klasifikasi citra y
     - Mengupload foto yang sudah ada
         ![galery](/documentation/galery.jpeg)
     - Memfoto langsung
-    <br>
         ![profile](/documentation/camera.jpeg)
     - Aplikasi menampikan diagnosis penyakit
         ![diagnosis](/documentation/hasil.jpeg)
