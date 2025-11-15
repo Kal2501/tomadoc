@@ -40,7 +40,7 @@ Aplikasi ini akan menganalisis gambar daun menggunakan model klasifikasi citra y
 
 ## Cara Penggunaan Aplikasi
 
-1. Download aplikasi yang ada pada [link berikut]([drive.google.com](https://drive.google.com/file/d/10jXipViHW1gKz716iY3938UHYbfbABAD/view?usp=sharing))
+1. Download aplikasi yang ada pada [link berikut]([https://drive.google.com/file/d/10jXipViHW1gKz716iY3938UHYbfbABAD/view?usp=sharing])
 2. Pastikan API sudah dijalankan
 3. Melakukan registrasi akun menggunakan username, email, password
     ![sign up](/documentation/regis.jpeg)
